@@ -1,0 +1,39 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start()
+{
+        local enable="$(uci get wsclient.@wsclient[0].enable)"
+        local wsserverip="$(uci get wsclient.@wsclient[0].wsserverip)"
+        local wsserverport="$(uci get wsclient.@wsclient[0].wsserverport)"
+        local uri="$(uci get wsclient.@wsclient[0].wsuri)"
+        local httpserver="$(uci get wsclient.@wsclient[0].httpserver)"
+        local token="$(uci get wsclient.@wsclient[0].token)"
+
+        if [ "$token" == "infoFFFFFFFFFFFF" ]
+        then
+                token=`date +%s%N | md5sum | head -c 16`
+                uci set wsclient.@wsclient[0].token=$token
+		        uci commit wsclient
+                echo $token
+        fi
+
+        if [ "$enable" == "0" ]
+        then
+                exit
+        else
+                /usr/sbin/wsclient  -u ws://$wsserverip:$wsserverport$uri -s $httpserver -t $token >> /dev/null &
+        fi
+}
+
+stop()
+{
+        killall -9 wsclient
+}
+
+restart() {
+    stop
+    start
+}
+

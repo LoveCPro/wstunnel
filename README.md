@@ -1,2 +1,2 @@
 # wstunnel
-wstunnel on lua
+wstunnel(lua) on openwrt
